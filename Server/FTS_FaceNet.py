@@ -6,9 +6,7 @@ import time
 import cv2
 
 
-#TCP_IP = "192.168.1.173"
-#TCP_IP = "10.67.28.40"
-TCP_IP = "10.67.22.221"
+TCP_IP = "localhost"
 TCP_PORT = 5000
 BUFFER_SIZE = 1024
 #Buffer_SIZE = 4096

@@ -13,7 +13,7 @@ isCaptureImage = False
 didTakeImage = False
 
 # Create a thread to send the image
-sendImageThread = FileTransferClient.FileTransferClient("10.67.22.221", 5000, 1024, "savedImage.jpg")
+sendImageThread = FileTransferClient.FileTransferClient("localhost", 5000, 1024, "savedImage.jpg")
 isConnected = sendImageThread.makeConnection()
 
 # variables for writing images
