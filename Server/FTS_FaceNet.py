@@ -50,6 +50,10 @@ class ClientThread(Thread):
         id = self.model.findIdentity(face)
         print("%s: The id of client is " %self.ip, id)
 
+        
+        if (id == None):
+            id = "None"
+            
         # Send the id back to the client
         self.sock.send(str.encode(id))
 
