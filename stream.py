@@ -5,7 +5,10 @@ from PIL import Image, ImageTk
 import FileTransferClient
 import numpy as np
 
-IMAGE_PADDING = 20
+IMAGE_PADDING_X = 10
+IMAGE_PADDING_Y_UP = 50
+IMAGE_PADDING_Y_DOWN = 25
+
 IMAGE_SIZE = 96
 
 # The boolean to dictate if the GUI takes an image
@@ -94,10 +97,10 @@ def show_frame():
     # Loop over the faces found and draw a rectangle
     for (x, y, w, h) in faces:
         foundFace = True
-        x1 = x + IMAGE_PADDING
-        y1 = y + IMAGE_PADDING
-        x2 = x + w + IMAGE_PADDING
-        y2 = y + h + IMAGE_PADDING
+        x1 = x - IMAGE_PADDING_X
+        y1 = y - IMAGE_PADDING_Y_UP
+        x2 = x + w + IMAGE_PADDING_X
+        y2 = y + h + IMAGE_PADDING_Y_DOWN
         cv2.rectangle(displayFrame, (x1, y1), (x2, y2), (255, 0, 0), lineType)
 
     # Take a picture if the button has been pressed
