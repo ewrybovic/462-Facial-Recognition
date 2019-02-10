@@ -24,22 +24,32 @@ def triplet_loss(y_true, y_pred, alpha = 0.3):
 
 # Function for determining the identity
 def who_is_it(image, database, model):
-	# from fr_utils.py
-	encoding = img_to_encoding(image, model)
+    # from fr_utils.py
+    encoding = img_to_encoding(image, model)
 
-	min_distance = 100
-	identity = None
+    min_distance = 0.8
+    identity = None
 
-	#Loop over the dictionary of names and encodings
-	for (name, enc) in database.items():
-		dist = np.linalg.norm(enc - encoding)
-		print("distance for %s is %s" %(name, dist))
+    # Create a dictionary of every name in the database
+    distance_Dictionary = {}
+    valid_Entry = False
 
-		# change to what I want
-		if dist > 0.8:
-			continue
-		else:
-			return name
+    #Loop over the dictionary of names and encodings
+    for (name, enc) in database.items():
+        dist = np.linalg.norm(enc - encoding)
+        print("distance for %s is %s" %(name, dist))
+
+        # change min_distance later
+        if dist < min_distance:
+            valid_Entry = True 
+            distance_Dictionary[name] = dist
+
+    if valid_Entry:
+        # Find the dictionary pair with the smallest value
+        key, _ = min(distance_Dictionary.items(), key=lambda x: x[1])
+        return key
+    else:
+        return None
 
 # Prepares the images to be processed by the FaceNet
 def prepare_database(model):
@@ -56,5 +66,5 @@ def prepare_database(model):
 
 # Takes a frame to find the person in it
 def find_identity(frame, database, model):
-	height, width, channels = frame.shape
-	return who_is_it(frame, database, model)
+    height, width, channels = frame.shape
+    return who_is_it(frame, database, model)
