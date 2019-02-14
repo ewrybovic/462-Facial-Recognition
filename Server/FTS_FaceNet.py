@@ -9,16 +9,18 @@ import cv2
 TCP_IP = "localhost"
 TCP_PORT = 5000
 BUFFER_SIZE = 1024
+DEBUG_MODE = False
 #Buffer_SIZE = 4096
 
 class ClientThread(Thread):
     # Constructor for the class
-    def __init__(self, ip, port, sock, model):
+    def __init__(self, ip, port, sock, model, debug):
         Thread.__init__(self)
         self.model = model
         self.ip = ip
         self.port = port
         self.sock = sock
+        self.debug = debug
         print("New thread started for "+ ip + ":", str(port))
 
     # Closes the socket
@@ -47,13 +49,15 @@ class ClientThread(Thread):
     def findIdentity(self, filename):
         print("%s: Finding ID" %self.ip)
         face = cv2.imread(filename)
-        id = self.model.findIdentity(face)
-        print("%s: The id of client is " %self.ip, id)
+        if not self.debug:
+            id = self.model.findIdentity(face)
+            print("%s: The id of client is " %self.ip, id)
 
-        
-        if (id == None):
-            id = "None"
-            
+            if (id == None):
+                id = "None"
+        else:
+            print("%s: Debug mode enabled" %self.ip)
+            id = "Debug"
         # Send the id back to the client
         self.sock.send(str.encode(id))
 
@@ -81,12 +85,13 @@ if __name__ == '__main__':
 
     # Create the model and compile it
     model = FaceNet()
-    model.start()
+    if not DEBUG_MODE:
+	    model.start()
 
-    # Wait for the model to finish before starting the server 
-    while not model.isDone:
-        time.sleep(5)
-        print("Model is still compiling")
+	    # Wait for the model to finish before starting the server 
+	    while not model.isDone:
+	        time.sleep(5)
+	        print("Model is still compiling")
 
     # Start the server
     print("Starting Server", TCP_IP + ":", TCP_PORT)
@@ -100,7 +105,7 @@ if __name__ == '__main__':
         tcpsock.listen(5)
         (conn, (ip, port)) = tcpsock.accept()
         print("Connection from", (ip, port))
-        newThread = ClientThread(ip, port, conn, model)
+        newThread = ClientThread(ip, port, conn, model, DEBUG_MODE)
         newThread.start()
         #threads.append(newThread)
 
