@@ -56,6 +56,7 @@ class FaceNetServer():
     def compileModel(self):
         # Compile the model
         if not self.debug:
+            print('Compiling model please wait.')
             self.model.start()
 
             # Wait for the model to finish before starting the server 
@@ -64,6 +65,9 @@ class FaceNetServer():
                 print("Server: Model is still compiling")
 
     def start(self):
+        # Compile the model
+        self.compileModel()
+
         # Create a thread that just runs the waitForConnections function
         connectionThread = Thread(target=self.waitForConnections)
         connectionThread.start()
@@ -78,7 +82,6 @@ class FaceNetServer():
 if __name__ == "__main__":
     TCP_IP = "localhost"
     TCP_PORT = 5000
-    DEBUG_MODE = True
-    print('Compiling model please wait.')
+    DEBUG_MODE = False
     server = FaceNetServer(TCP_IP, TCP_PORT, DEBUG_MODE)
     server.start()
