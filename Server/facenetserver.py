@@ -11,7 +11,7 @@ class FaceNetServer():
         self.debug = debug
         self.shutdown = False
         self.threads = []
-        self.model = FaceNet()
+        self.model = None
 
     # Parse the command that the user sent to the server
     def parseCommand(self, command):
@@ -19,6 +19,10 @@ class FaceNetServer():
             print("Server: Shutdown starting")
             self.shutdown = True
             self.startShutdown()
+        elif command == "recomp":
+            print("Server: Recompiling model")
+            self.model = self.compileModel()
+            self.sendModelToThreads()
         else:
             print("Server: Unknown Command")
 
@@ -52,21 +56,30 @@ class FaceNetServer():
             except:
                 pass
 
+    # Sends the new model over to each client thread opened
+    def sendModelToThreads(self):
+        for thread in self.threads:
+            thread.model = self.model
+
     # Compiles the model if debug is not true
     def compileModel(self):
         # Compile the model
         if not self.debug:
-            print('Compiling model please wait.')
-            self.model.start()
+            print('Server: Compiling model please wait.')
+            model = FaceNet()
+            model.start()
 
             # Wait for the model to finish before starting the server 
-            while not self.model.isDone:
+            while not model.isDone:
                 time.sleep(5)
                 print("Server: Model is still compiling")
 
+            return model
+
+    # Function that kicks off the server
     def start(self):
         # Compile the model
-        self.compileModel()
+        self.model = self.compileModel()
 
         # Create a thread that just runs the waitForConnections function
         connectionThread = Thread(target=self.waitForConnections)

@@ -15,11 +15,15 @@ class FaceNet(Thread):
         self.image_size = 96
         self.isDone = False
         Thread.__init__(self)
-        # Set the format of keras so a 100 x 100 RGB image has shap(3, 100, 100)
-        K.set_image_data_format("channels_first")
     
     # Function that will run asynchronously, creates the FaceNet model
     def run(self):
+        self.isDone = False
+
+        # Set the format of keras so a 100 x 100 RGB image has shap(3, 100, 100)
+        K.clear_session()
+        K.set_image_data_format("channels_first")
+
         # Create and compile the model
         self.FRmodel = faceRecoModel(input_shape=(3, self.image_size, self.image_size))
         self.FRmodel.compile(optimizer='adam', loss=FaceNetFunctions.triplet_loss, metrics=['accuracy'])
