@@ -4,6 +4,8 @@ import PIL
 from PIL import Image, ImageTk
 import FileTransferClient
 import numpy as np
+from time import sleep
+from threading import Thread
 
 IMAGE_PADDING_X = 10
 IMAGE_PADDING_Y_UP = 50
@@ -11,13 +13,31 @@ IMAGE_PADDING_Y_DOWN = 25
 
 IMAGE_SIZE = 96
 
+# Network Ports  FCHANGE
+TCP_IP = "localhost"
+TCP_SERVER_PORT = 5000
+TCP_FTP_PORT    = 3000
+
 # The boolean to dictate if the GUI takes an image
 isCaptureImage = False
 didTakeImage = False
+isConnected = False
+Shutdown = False
+sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
-sendImageThread = FileTransferClient.FileTransferClient("localhost", 5000, 1024, "savedImage.jpg")
-isConnected = sendImageThread.makeConnection()
+def thread_image_function():
+
+	global isConnected
+	global Shutdown
+	global sendImageThread
+    
+	while not isConnected and not Shutdown:	
+		isConnected = sendImageThread.makeConnection()
+		if isConnected == False:
+			sleep(0.5)
+		print("Trying to reconnect")
+	print("Broke out of the while loop")
 
 # variables for writing images
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -40,8 +60,11 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 # Make the root of Tkinter
 root = Tk()
 
-# Closing function
+# Closing function, also closes FCHANGE
 def close():
+    global Shutdown
+    Shutdown = True
+    sendImageThread.closeSocket()
     root.quit()
 
 # binf the escape key to quit the GUI
@@ -74,6 +97,9 @@ menubar.add_cascade(label = "File", menu = fileMenu)
 
 # Add the emnubar to the root
 root.config(menu = menubar)
+
+# handle exit through GUI X FCHANGE
+root.protocol("WM_DELETE_WINDOW", close)
 
 # Returns the image of only the face
 def getROI(frame, x1, y1, x2, y2):
@@ -152,6 +178,10 @@ def show_frame():
     
     # Calls this function after a given interval
     imageBox.after(int(1000/60), show_frame)
+
+# Start thread for connecting thread function
+thread = Thread(target = thread_image_function)
+thread.start()
 
 # Call show frame to start the loop
 show_frame()
