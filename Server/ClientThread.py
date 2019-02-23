@@ -25,7 +25,7 @@ class ClientThread(Thread):
 
     # Read the data that comes from the client
     def readData(self):
-        filename = "%s_%s.jpg" %(self.ip, time.time())
+        filename = "%s.jpg" %self.ip
         with open(filename, 'wb') as f:
             print("%s: File opened" %self.ip)
             while True:
