@@ -47,7 +47,8 @@ class ClientThread(Thread):
         if not self.debug:
             id = self.model.findIdentity(face)
             print("%s: The id of client is " %self.ip, id)
-
+            print("The epoch time is %s" %time.time())
+            cv2.imwrite("/images/%s_%s.jpg" %(id, time.time()), face)
             if (id == None):
                 id = "None"
         else:
