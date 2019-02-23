@@ -11,12 +11,17 @@ IMAGE_PADDING_Y_DOWN = 25
 
 IMAGE_SIZE = 96
 
+# Network Ports  FCHANGE
+TCP_IP = "localhost"
+TCP_SERVER_PORT = 5000
+TCP_FTP_PORT    = 3000
+
 # The boolean to dictate if the GUI takes an image
 isCaptureImage = False
 didTakeImage = False
 
 # Create a thread to send the image
-sendImageThread = FileTransferClient.FileTransferClient("localhost", 5000, 1024, "savedImage.jpg")
+sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
 isConnected = sendImageThread.makeConnection()
 
 # variables for writing images
@@ -40,8 +45,9 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 # Make the root of Tkinter
 root = Tk()
 
-# Closing function
+# Closing function, also closes FCHANGE
 def close():
+    sendImageThread.closeSocket()
     root.quit()
 
 # binf the escape key to quit the GUI
@@ -74,6 +80,9 @@ menubar.add_cascade(label = "File", menu = fileMenu)
 
 # Add the emnubar to the root
 root.config(menu = menubar)
+
+# handle exit through GUI X FCHANGE
+root.protocol("WM_DELETE_WINDOW", close)
 
 # Returns the image of only the face
 def getROI(frame, x1, y1, x2, y2):
