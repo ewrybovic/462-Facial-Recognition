@@ -5,9 +5,10 @@ from ClientThread import ClientThread
 import time
 
 class FaceNetServer():
-    def __init__(self, ip, port, debug):
+    def __init__(self, ip, port, ftp_port, debug):
         self.ip = ip
         self.port = port
+        self.ftp_port = ftp_port
         self.debug = debug
         self.shutdown = False
         self.threads = []
@@ -48,7 +49,8 @@ class FaceNetServer():
                 tcpsock.listen(5)
                 (client_conn, (client_ip, client_port)) = tcpsock.accept()
                 print("Server: Connection from", (client_ip, client_port))
-                newThread = ClientThread(client_ip, client_port, client_conn, self.model, self.debug)
+                # FCHANGE
+                newThread = ClientThread(client_ip, client_port, self.ftp_port, client_conn, self.model, self.debug)
                 newThread.start()
                 self.threads.append(newThread)
 
@@ -95,6 +97,7 @@ class FaceNetServer():
 if __name__ == "__main__":
     TCP_IP = "localhost"
     TCP_PORT = 5000
+    TCP_FTP_PORT = 3000
     DEBUG_MODE = False
-    server = FaceNetServer(TCP_IP, TCP_PORT, DEBUG_MODE)
-    server.start()
+    server = FaceNetServer(TCP_IP, TCP_PORT, TCP_FTP_PORT,DEBUG_MODE)
+server.start()

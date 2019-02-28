@@ -6,11 +6,12 @@ BUFFER_SIZE = 1024
 
 class ClientThread(Thread):
     # Constructor for the class
-    def __init__(self, ip, port, sock, model, debug):
+    def __init__(self, ip, port, ftp_port,sock, model, debug):
         Thread.__init__(self)
         self.model = model
         self.ip = ip
         self.port = port
+        self.ftp_port = ftp_port
         self.sock = sock
         self.debug = debug
         self.didDisconnect = False
@@ -25,11 +26,12 @@ class ClientThread(Thread):
 
     # Read the data that comes from the client
     def readData(self):
+        ftpSock = self.getFTPConnection() #FCHANGE
         filename = "%s.jpg" %self.ip
         with open(filename, 'wb') as f:
             print("%s: File opened" %self.ip)
             while True:
-                data = self.sock.recv(BUFFER_SIZE)
+                data = ftpSock.recv(BUFFER_SIZE)
                 if not data or data == b'1':
                     f.close()
                     print("%s: Data received, closing file" %self.ip)
@@ -37,6 +39,8 @@ class ClientThread(Thread):
                 
                 #write data to file
                 f.write(data)
+        print("Closed Server FTP connection...")
+        ftpSock.close()
         print("%s: Successfully closed file" %self.ip)
         self.findIdentity(filename)
 
@@ -55,6 +59,18 @@ class ClientThread(Thread):
             id = "Debug"
         # Send the id back to the client
         self.sock.send(str.encode(id))
+    
+    # function to set up socket to let clinet connect to ftp port
+    def getFTPConnection(self):
+        #make a socket and listn, then return the socket
+        ftpTransSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ftpTransSock.bind(('', self.ftp_port))
+        while True:
+            ftpTransSock.listen()
+            ftpConnSock, addr = ftpTransSock.accept()
+            break
+        print("Accepted connection from: " + str(addr))
+        return ftpConnSock
 
     # Overall structure for the server
     def run(self):

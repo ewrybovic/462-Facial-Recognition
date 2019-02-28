@@ -6,13 +6,14 @@ import time
 # Class for a file tansfer client will send an image to a server in a new thread
 class FileTransferClient(Thread):
     # Constructor for the class
-    def __init__(self, ip, port, buffersize, filename, isSimulated = False):
+    def __init__(self, ip, port, ftp_port,buffersize, filename, isSimulated = False):
         #TCP_IP = "192.168.1.173"
         #TCP_PORT = 5000
         #BUFFER_SIZE = 4096
         Thread.__init__(self)
         self.TCP_IP = ip
         self.TCP_PORT = port
+        self.TCP_FTP_PORT = ftp_port
         self.BUFFER_SIZE = buffersize
         self.filename = filename
         self.isSimulated = isSimulated
@@ -51,6 +52,13 @@ class FileTransferClient(Thread):
         self.closeSocket()
         print("Closing Socket")
         #sys.exit()
+    
+    # function to set up socket to let clinet connect to ftp port
+    def establishFTPConnection(self):
+        ftpPort = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ftpPort.connect((self.TCP_IP, self.TCP_FTP_PORT))
+        print("FTP port established" + ":" + str(self.TCP_FTP_PORT))
+        return ftpPort
 
     # Send the image file to the server
     def run(self):
@@ -58,13 +66,14 @@ class FileTransferClient(Thread):
             return
 
         # Send the send image command
-        self.sock.send(b"send image")
+        self.sock.send(b"send image") 
         isReady = self.sock.recv(self.BUFFER_SIZE)
         if isReady != b'1':
             print("Bad connection to server")
             self.closeSocket()
             return
-
+        #FCHANGE
+        imgTransSock = self.establishFTPConnection()
         print("Sending file")
         f = open(self.filename, 'rb')
         while True:
@@ -73,7 +82,7 @@ class FileTransferClient(Thread):
 
             # Keep reading the file until it is empty
             while (data):
-                self.sock.send(data)
+                imgTransSock.send(data) #FCHANG send through ftp port
 
                 # Only read small chunks of data can change this
                 data = f.read(self.BUFFER_SIZE)
@@ -85,9 +94,8 @@ class FileTransferClient(Thread):
                 self.sock.send(b'1')
                 #self.closeSocket()
                 break
-
+        print("Closing client FTP connection")
+        imgTransSock.close()
         # Get the id of the image sent
         self.id = str(self.sock.recv(self.BUFFER_SIZE), 'utf-8')
         print("Your id is: ", id)
-
-        self.closeThread()
