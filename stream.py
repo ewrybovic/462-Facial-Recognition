@@ -177,10 +177,10 @@ def show_frame():
 
         # Start the thread and send the image
         if not sendImageThread.isDone:
-            sendImageThread.start()
-        else:
             sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
             sendImageThread.openSocket()
+            sendImageThread.start()
+        else:
             sendImageThread.start()
 
     # If there is no connection to the server notify the user
