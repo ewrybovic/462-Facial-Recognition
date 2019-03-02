@@ -58,11 +58,27 @@ class ClientThread(Thread):
             id_ = "Debug"
         # Send the id back to the client
         self.sock.send(id_.encode())
+    
+    # receive the name from the client, and rename the image
+    def set_name(self):
+        new_name = self.sock.recv(BUFFER_SIZE)
+        new_name = str(new_name, 'utf-8')
+        
+        # next change image file name to match the new id
+        # and move the file into the images folder
+        
+        # the locations where the image is, and where it will be moved to
+        old_path = os.getcwd() + "\\" + self.ip + ".jpg"
+        new_path = os.getcwd() + "\Images\\" + new_name + ".jpg"
+        
+        # moves the image into the images folder, and names it 'new_id'.jpg
+        os.rename(old_path, new_path)
+        
+        print("%s: The id of client is now " %self.ip, new_name) # move to after changing image
 
     # Overall structure for the server
     def run(self):
         self.sock.settimeout(1)
-        setName = False # becomes true if set user name command was last used
         while not self.shutdown:
             try:
                 command = self.sock.recv(BUFFER_SIZE)
@@ -73,24 +89,7 @@ class ClientThread(Thread):
                     self.sock.send(b'1')
                     self.readData()
                 elif command == b"set new user name":
-                    setName = True
-                elif setName == True:
-                    # after finishing the set new user name command, receive the name from the client
-                    new_id = str(command, 'utf-8')
-                    
-                    # next change image file name to match the new id
-                    # and move the file into the images folder
-                    
-                    # the locations where the image is, and where it will be moved to
-                    old_path = os.getcwd() + "\\" + self.ip + ".jpg"
-                    new_path = os.getcwd() + "\Images\\" + new_id + ".jpg"
-                    
-                    # moves the image into the images folder, and names it 'new_id'.jpg
-                    os.rename(old_path, new_path)
-                    
-                    print("%s: The id of client is now " %self.ip, new_id) # move to after changing image
-                    
-                    setName = False
+                    self.set_name()
                 elif command == b"":
                     self.closeSocket()
                     break
