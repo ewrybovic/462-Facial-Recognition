@@ -106,6 +106,38 @@ def getROI(frame, x1, y1, x2, y2):
     height, width, _ = frame.shape
     return frame[max(0, y1):min(height, y2), max(0, x1):min(width, x2)]
 
+# function to send the new user's id to the server
+# runs after the user types in their name
+def send_name():
+    # get the name from the entry box the user typed in
+    user_name = name_entry.get()
+    sendImageThread.id = user_name
+    
+    # send this name/id to the server
+    sendImageThread.sock.send(b"set new user name")
+    sendImageThread.sock.send(user_name.encode())
+    
+    entry_box.destroy()
+
+# bring up a text box to have the new user enter their name
+def enter_user_name():
+    # create a new window where the name will be entered
+    global entry_box
+    entry_box = Toplevel(root)
+    entry_box.wm_title("New User")
+    
+    Label(entry_box, text = "Enter your name").grid(row = 0)
+    global name_entry
+    name_entry = Entry(entry_box)
+    name_entry.grid(row = 0, column = 1)
+    
+    # id will be changed later, when the user enters their name
+    sendImageThread.id = ""
+    
+    # create a button labeled enter; when pressed the window will close, and send the name to the server
+    Button(entry_box, text = "Enter", command = send_name).grid(row = 3, column = 1, sticky = W, pady = 3)
+  
+
 def show_frame():
     global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor
     imageText = ""
@@ -157,8 +189,12 @@ def show_frame():
         if sendImageThread.isAlive():
             imageText = "Status: Sending image to server"
         else:
-            if sendImageThread.id != None:
+            if sendImageThread.id != "None" and sendImageThread.id != "":
                 imageText = "Status: Your name is " + sendImageThread.id
+            elif sendImageThread.id == "None":
+                # id is none, have user enter their name, save in id
+                imageText = "Status: New user"
+                enter_user_name()
             elif didTakeImage:
                 imageText = "Status: Image sent to server"
             else:

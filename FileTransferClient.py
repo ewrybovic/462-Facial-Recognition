@@ -16,7 +16,7 @@ class FileTransferClient(Thread):
         self.BUFFER_SIZE = buffersize
         self.filename = filename
         self.isSimulated = isSimulated
-        self.id = None
+        self.id = ""
 
     # Closes the socket
     def closeSocket(self):
@@ -88,6 +88,9 @@ class FileTransferClient(Thread):
 
         # Get the id of the image sent
         self.id = str(self.sock.recv(self.BUFFER_SIZE), 'utf-8')
-        print("Your id is: ", id)
+        
+        if (self.id != "None" and self.id != ""):
+            print("Your id is: ", self.id)
 
-        self.closeThread()
+        # need to keep the thread open until closing the window
+        # self.closeThread()

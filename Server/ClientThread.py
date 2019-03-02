@@ -1,6 +1,7 @@
 import socket
 import cv2
 from threading import Thread
+import os
 
 BUFFER_SIZE = 1024
 
@@ -45,19 +46,23 @@ class ClientThread(Thread):
         print("%s: Finding ID" %self.ip)
         face = cv2.imread(filename)
         if not self.debug:
-            id = self.model.findIdentity(face)
-            print("%s: The id of client is " %self.ip, id)
-            if (id == None):
-                id = "None"
+            # using id_ because id is a built in function
+            id_ = self.model.findIdentity(face)
+            print("%s: The id of client is " %self.ip, id_)
+
+            if (id_ == None):
+                id_ = "None"
+				
         else:
             print("%s: Debug mode enabled" %self.ip)
-            id = "Debug"
+            id_ = "Debug"
         # Send the id back to the client
-        self.sock.send(str.encode(id))
+        self.sock.send(id_.encode())
 
     # Overall structure for the server
     def run(self):
         self.sock.settimeout(1)
+        setName = False # becomes true if set user name command was last used
         while not self.shutdown:
             try:
                 command = self.sock.recv(BUFFER_SIZE)
@@ -67,6 +72,25 @@ class ClientThread(Thread):
                 elif command == b"send image":
                     self.sock.send(b'1')
                     self.readData()
+                elif command == b"set new user name":
+                    setName = True
+                elif setName == True:
+                    # after finishing the set new user name command, receive the name from the client
+                    new_id = str(command, 'utf-8')
+                    
+                    # next change image file name to match the new id
+                    # and move the file into the images folder
+                    
+                    # the locations where the image is, and where it will be moved to
+                    old_path = os.getcwd() + "\\" + self.ip + ".jpg"
+                    new_path = os.getcwd() + "\Images\\" + new_id + ".jpg"
+                    
+                    # moves the image into the images folder, and names it 'new_id'.jpg
+                    os.rename(old_path, new_path)
+                    
+                    print("%s: The id of client is now " %self.ip, new_id) # move to after changing image
+                    
+                    setName = False
                 elif command == b"":
                     self.closeSocket()
                     break
