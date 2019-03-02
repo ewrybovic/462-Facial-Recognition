@@ -114,8 +114,7 @@ def send_name():
     sendImageThread.id = user_name
     
     # send this name/id to the server
-    sendImageThread.sock.send(b"set new user name")
-    sendImageThread.sock.send(user_name.encode())
+    sendImageThread.send_name_to_server(user_name)
     
     entry_box.destroy()
 

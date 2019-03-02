@@ -51,6 +51,13 @@ class FileTransferClient(Thread):
         self.closeSocket()
         print("Closing Socket")
         #sys.exit()
+    
+    # send a new user name to the server, used in send_name() function in stream.py
+    def send_name_to_server(self, user_name):
+        self.sock.send(b"set new user name")
+        time.sleep(0.5)
+        self.sock.send(user_name.encode())
+        self.closeThread()
 
     # Send the image file to the server
     def run(self):
@@ -91,6 +98,7 @@ class FileTransferClient(Thread):
         
         if (self.id != "None" and self.id != ""):
             print("Your id is: ", self.id)
+            self.closeThread()
 
         # need to keep the thread open until closing the window
         # self.closeThread()
