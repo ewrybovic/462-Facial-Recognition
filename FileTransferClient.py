@@ -16,7 +16,13 @@ class FileTransferClient(Thread):
         self.BUFFER_SIZE = buffersize
         self.filename = filename
         self.isSimulated = isSimulated
+        self.isDone = False
         self.id = ""
+
+    def openSocket(self):
+        print("Opening Socket")
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.TCP_IP, self.TCP_PORT))
 
     # Closes the socket
     def closeSocket(self):
@@ -30,8 +36,7 @@ class FileTransferClient(Thread):
 
         # Try to open the socket and ping the server
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.connect((self.TCP_IP, self.TCP_PORT))
+            self.openSocket()
             self.sock.send(b"status")
             status = self.sock.recv(self.BUFFER_SIZE)
             
