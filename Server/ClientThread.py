@@ -1,6 +1,7 @@
 import socket
 import cv2
 from threading import Thread
+from sys import platform
 import os
 
 BUFFER_SIZE = 1024
@@ -68,9 +69,13 @@ class ClientThread(Thread):
         # and move the file into the images folder
         
         # the locations where the image is, and where it will be moved to
-        old_path = os.getcwd() + "\\" + self.ip + ".jpg"
-        new_path = os.getcwd() + "\Images\\" + new_name + ".jpg"
-        
+        if platform == 'linux' or platform == 'linux2':
+            old_path = os.getcwd() + "/" + self.ip + ".jpg"
+            new_path = os.getcwd() + "/images/" + new_name + ".jpg"
+        elif platform == 'win32':
+            old_path = os.getcwd() + "\\" + self.ip + ".jpg"
+            new_path = os.getcwd() + "\\images\\" + new_name + ".jpg"
+            
         # moves the image into the images folder, and names it 'new_id'.jpg
         os.rename(old_path, new_path)
         
