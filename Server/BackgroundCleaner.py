@@ -10,6 +10,7 @@ MASK_DILATE_ITER = 10
 MASK_ERODE_ITER = 10
 MASK_COLOR = (0.0, 0.0, 0)
 
+# Detects edges in an image and removes noise from the background using Opening
 def edgeDetection(img, DEBUG=False, ERODE_IMAGE=True):
 	# Find edges in the image
 	edges = cv2.Canny(img, CANNY_THRESH_1, CANNY_THRESH_2)
@@ -35,6 +36,7 @@ def edgeDetection(img, DEBUG=False, ERODE_IMAGE=True):
 
 	return edges
 
+# Creates a mask of the iamge
 def createMask(edges, DEBUG=False, BLUR_MASK=False):
 	# Find contours in the edges, sort by the area
 	contour_info = []
@@ -85,6 +87,7 @@ def createMask(edges, DEBUG=False, BLUR_MASK=False):
 
 	return mask
 
+# Blends the make and image together
 def blendMaskAndImage(img, mask):
 	# Create a 3-channel np array
 	mask_stack = np.dstack([mask]*3)
@@ -98,6 +101,7 @@ def blendMaskAndImage(img, mask):
 	masked = (masked * 255).astype('uint8')
 	return masked
 
+# Function to call to remove the background of an image
 def CleanBackground(img, debug=False, blur_mask=False, erode_image=True):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	edges = edgeDetection(gray, DEBUG=debug, ERODE_IMAGE=erode_image)
@@ -105,11 +109,7 @@ def CleanBackground(img, debug=False, blur_mask=False, erode_image=True):
 	return blendMaskAndImage(img, mask)
 
 if __name__ == '__main__':
-	img = CleanBackground(cv2.imread('face.jpg'), debug=True, blur_mask=False)
-	'''gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	edges = edgeDetection(gray)
-	mask = createMask(edges)
-	img = blendMaskandImage(img, mask)'''
+	img = CleanBackground(cv2.imread('face.jpg'))
 	cv2.imshow('output', img)
 	cv2.waitKey()
 
