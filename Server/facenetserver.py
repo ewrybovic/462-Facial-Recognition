@@ -76,6 +76,26 @@ class FaceNetServer():
 
             return model
 
+    # Recompile the model when an unknown user gives their name
+    def recompileOnNewImage(self):
+        
+        # continually check each thread to see if we need to recompile the model
+        while not self.shutdown:
+            for thread in self.threads:
+                
+                # recompile will be set to true after a new user's image is placed in  the images folder
+                if thread.recompile == True:
+                    print("Server: New user, recompiling model")
+                    thread.recompile = False
+                    
+                    self.model = self.compileModel()
+                    self.sendModelToThreads()
+                    
+                    print("Server: Done recompiling")
+            
+            # only check threads every couple of seconds instead of constantly
+            time.sleep(5)
+
     # Function that kicks off the server
     def start(self):
         # Compile the model
@@ -84,6 +104,10 @@ class FaceNetServer():
         # Create a thread that just runs the waitForConnections function
         connectionThread = Thread(target=self.waitForConnections)
         connectionThread.start()
+        
+        # create a thread for recompiling, runs the recompileOnNewImage function
+        recompileThread = Thread(target = self.recompileOnNewImage)
+        recompileThread.start()
 
         # While the serer is not shutting down 
         while not self.shutdown:

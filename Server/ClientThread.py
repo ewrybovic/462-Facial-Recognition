@@ -18,6 +18,7 @@ class ClientThread(Thread):
         self.debug = debug
         self.didDisconnect = False
         self.shutdown = False
+        self.recompile = False
         print(ip +": New thread started for "+ ip + ":", str(port))
 
     # Closes the socket
@@ -87,7 +88,7 @@ class ClientThread(Thread):
         # moves the image into the images folder, and names it 'new_id'.jpg
         os.rename(old_path, new_path)
         
-        print("%s: The id of client is now " %self.ip, new_name) # move to after changing image
+        print("%s: The id of client is now " %self.ip, new_name)
 	
         conn = sqlite3.connect('FacRecDatabase.db')
         newName = (new_name,)
@@ -97,7 +98,9 @@ class ClientThread(Thread):
         for row in c.execute('SELECT * FROM FaceRecInfo ORDER BY name'):
             print (row)
         conn.close()
-
+        
+        # will let the server know it needs to recompile so the new user can be recognized
+        self.recompile = True
 
     # Overall structure for the server
     def run(self):
