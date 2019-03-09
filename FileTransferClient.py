@@ -57,7 +57,7 @@ class FileTransferClient(Thread):
     def establishFTPConnection(self):
         ftpPort = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ftpPort.connect((self.TCP_IP, self.TCP_FTP_PORT))
-        print("FTP port established" + ":" + str(self.TCP_FTP_PORT))
+        print("%s: FTP connection established to (%s, %s)" %(self.TCP_IP, str(self.TCP_IP), str(self.TCP_FTP_PORT)))
         return ftpPort
 
     # Send the image file to the server
@@ -94,7 +94,7 @@ class FileTransferClient(Thread):
                 self.sock.send(b'1')
                 #self.closeSocket()
                 break
-        print("Closing client FTP connection")
+        print("%s: Closing client FTP connection to (%s, %s)" %(self.TCP_IP, str(self.TCP_IP), str(self.TCP_FTP_PORT)))
         imgTransSock.close()
         # Get the id of the image sent
         self.id = str(self.sock.recv(self.BUFFER_SIZE), 'utf-8')

@@ -39,7 +39,7 @@ class ClientThread(Thread):
                 
                 #write data to file
                 f.write(data)
-        print("Closed Server FTP connection...")
+        print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
         print("%s: Successfully closed file" %self.ip)
         self.findIdentity(filename)
@@ -69,7 +69,7 @@ class ClientThread(Thread):
             ftpTransSock.listen()
             ftpConnSock, addr = ftpTransSock.accept()
             break
-        print("Accepted connection from: " + str(addr))
+        print("%s: FTP connection from (%s)" %(self.ip, str(addr)))
         return ftpConnSock
 
     # Overall structure for the server
