@@ -51,6 +51,7 @@ face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 # Set the width and the height of the frame
 width, height = 1280, 720
+width, height = 640, 480 #delete
 
 # Create the video capture and set the widht and height
 cap = cv2.VideoCapture(0)
