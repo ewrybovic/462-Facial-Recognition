@@ -3,6 +3,7 @@ import cv2
 from threading import Thread
 from sys import platform
 import os
+import sqlite3
 
 BUFFER_SIZE = 1024
 
@@ -17,6 +18,7 @@ class ClientThread(Thread):
         self.debug = debug
         self.didDisconnect = False
         self.shutdown = False
+        self.recompile = False
         print(ip +": New thread started for "+ ip + ":", str(port))
 
     # Closes the socket
@@ -53,6 +55,13 @@ class ClientThread(Thread):
 
             if (id_ == None):
                 id_ = "None"
+            #else:
+                #conn = sqlite3.connect('FacRecDatabase.db')
+                #lookup = (id_,)
+                #c = conn.cursor()
+                #c.execute('SELECT * FROM FacRecInfo WHERE symbol=?', lookup)
+                #print (c.fetchone())
+                #conn.close()
 				
         else:
             print("%s: Debug mode enabled" %self.ip)
@@ -79,7 +88,19 @@ class ClientThread(Thread):
         # moves the image into the images folder, and names it 'new_id'.jpg
         os.rename(old_path, new_path)
         
-        print("%s: The id of client is now " %self.ip, new_name) # move to after changing image
+        print("%s: The id of client is now " %self.ip, new_name)
+	
+        conn = sqlite3.connect('FacRecDatabase.db')
+        newName = (new_name,)
+        c = conn.cursor()
+        c.execute('''INSERT INTO FaceRecInfo VALUES (?, 'Youtube.com')''', newName)
+        conn.commit()
+        for row in c.execute('SELECT * FROM FaceRecInfo ORDER BY name'):
+            print (row)
+        conn.close()
+        
+        # will let the server know it needs to recompile so the new user can be recognized
+        self.recompile = True
 
     # Overall structure for the server
     def run(self):
