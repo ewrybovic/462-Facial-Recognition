@@ -51,7 +51,6 @@ face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
 # Set the width and the height of the frame
 width, height = 1280, 720
-width, height = 640, 480 #delete
 
 # Create the video capture and set the widht and height
 cap = cv2.VideoCapture(0)
@@ -119,6 +118,11 @@ def send_name():
     
     entry_box.destroy()
 
+# creates a thread to run the send_name function, so the UI won't hang
+def send_name_thread():
+    nameThread = Thread(target = send_name)
+    nameThread.start()
+
 # bring up a text box to have the new user enter their name
 def enter_user_name():
     # create a new window where the name will be entered
@@ -135,7 +139,7 @@ def enter_user_name():
     sendImageThread.id = ""
     
     # create a button labeled enter; when pressed the window will close, and send the name to the server
-    Button(entry_box, text = "Enter", command = send_name).grid(row = 3, column = 1, sticky = W, pady = 3)
+    Button(entry_box, text = "Enter", command = send_name_thread).grid(row = 3, column = 1, sticky = W, pady = 3)
   
 
 def show_frame():
