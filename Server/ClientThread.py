@@ -71,7 +71,7 @@ class ClientThread(Thread):
             print("%s: Debug mode enabled" %self.ip)
             id_ = "Debug"
         # Send the id back to the client
-        self.sock.send(str.encode(id))
+        self.sock.send(id_.encode())
     
     # function to set up socket to let clinet connect to ftp port
     def getFTPConnection(self):
@@ -85,8 +85,6 @@ class ClientThread(Thread):
             break
         print("%s: FTP connection from (%s)" %(self.ip, str(addr)))
         return ftpConnSock
-
-        self.sock.send(id_.encode())
     
     # receive the name from the client, and rename the image
     def set_name(self):

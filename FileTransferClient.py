@@ -55,7 +55,6 @@ class FileTransferClient(Thread):
     # Kills the thread
     def closeThread(self):
         self.closeSocket()
-        print("Closing Socket")
         #sys.exit()
     
     # function to set up socket to let clinet connect to ftp port
@@ -103,14 +102,13 @@ class FileTransferClient(Thread):
                 f.close()
                 time.sleep(0.5)
                 # Tell the sever the file has been fully transfered
-                self.sock.send(b'1')
+                imgTransSock.send(b'1')
                 #self.closeSocket()
                 break
         print("%s: Closing client FTP connection to (%s, %s)" %(self.TCP_IP, str(self.TCP_IP), str(self.TCP_FTP_PORT)))
         imgTransSock.close()
         # Get the id of the image sent
         self.id = str(self.sock.recv(self.BUFFER_SIZE), 'utf-8')
-        print("Your id is: ", id)
         
         if (self.id != "None" and self.id != ""):
             print("Your id is: ", self.id)

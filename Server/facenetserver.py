@@ -122,6 +122,6 @@ if __name__ == "__main__":
     TCP_IP = "localhost"
     TCP_PORT = 5000
     TCP_FTP_PORT = 3000
-    DEBUG_MODE = True # change back to false once done testing
+    DEBUG_MODE = False # change back to false once done testing
     server = FaceNetServer(TCP_IP, TCP_PORT, TCP_FTP_PORT,DEBUG_MODE)
 server.start()
