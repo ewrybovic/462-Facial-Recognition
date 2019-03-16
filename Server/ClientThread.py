@@ -55,13 +55,13 @@ class ClientThread(Thread):
 
             if (id_ == None):
                 id_ = "None"
-            else:
-                conn = sqlite3.connect('FacRecDatabase.db')
-                lookup = (id_,)
-                c = conn.cursor()
-                c.execute('SELECT * FROM FacRecInfo WHERE symbol=?', lookup)
-                print (c.fetchone())
-                conn.close()
+            #else:
+                #conn = sqlite3.connect('FacRecDatabase.db')
+                #lookup = (id_,)
+                #c = conn.cursor()
+                #c.execute('SELECT * FROM FacRecInfo WHERE symbol=?', lookup)
+                #print (c.fetchone())
+                #conn.close()
 				
         else:
             print("%s: Debug mode enabled" %self.ip)

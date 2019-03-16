@@ -12,6 +12,12 @@ MASK_COLOR = (0.0, 0.0, 0)
 
 # Detects edges in an image and removes noise from the background using Opening
 def edgeDetection(img, DEBUG=False, ERODE_IMAGE=True):
+	img = cv2.GaussianBlur(img, (1,1), 0)
+	if DEBUG:
+		cv2.imshow('Blur',img)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
+
 	# Find edges in the image
 	edges = cv2.Canny(img, CANNY_THRESH_1, CANNY_THRESH_2)
 	if DEBUG:
@@ -37,7 +43,7 @@ def edgeDetection(img, DEBUG=False, ERODE_IMAGE=True):
 	return edges
 
 # Creates a mask of the iamge
-def createMask(edges, DEBUG=False, BLUR_MASK=False):
+def createMask(edges, DEBUG=False, ERODE_MASK=False):
 	# Find contours in the edges, sort by the area
 	contour_info = []
 
@@ -66,7 +72,7 @@ def createMask(edges, DEBUG=False, BLUR_MASK=False):
 		cv2.destroyAllWindows()
 
 	# Smooth and blur mask
-	if BLUR_MASK:
+	if ERODE_MASK:
 		mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
 		if DEBUG:
 			cv2.imshow('mDilate',mask)
@@ -79,11 +85,12 @@ def createMask(edges, DEBUG=False, BLUR_MASK=False):
 			cv2.waitKey(0)
 			cv2.destroyAllWindows()
 
-		mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
-		if DEBUG:
-			cv2.imshow('mGaus',mask)
-			cv2.waitKey(0)
-			cv2.destroyAllWindows()
+	# BLur mask to get rid of artifacts
+	mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
+	if DEBUG:
+		cv2.imshow('mGaus',mask)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
 
 	return mask
 
@@ -102,14 +109,14 @@ def blendMaskAndImage(img, mask):
 	return masked
 
 # Function to call to remove the background of an image
-def CleanBackground(img, debug=False, blur_mask=False, erode_image=True):
+def CleanBackground(img, debug=True, erode_mask=False, erode_image=True):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	edges = edgeDetection(gray, DEBUG=debug, ERODE_IMAGE=erode_image)
-	mask = createMask(edges, DEBUG=debug, BLUR_MASK=blur_mask)
+	mask = createMask(edges, DEBUG=debug, ERODE_MASK=erode_mask)
 	return blendMaskAndImage(img, mask)
 
 if __name__ == '__main__':
-	img = CleanBackground(cv2.imread('face.jpg'))
+	img = CleanBackground(cv2.imread('Evan.jpg'))
 	cv2.imshow('output', img)
 	cv2.waitKey()
 
