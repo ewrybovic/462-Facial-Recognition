@@ -17,7 +17,13 @@ class FileTransferClient(Thread):
         self.BUFFER_SIZE = buffersize
         self.filename = filename
         self.isSimulated = isSimulated
-        self.id = None
+        self.isDone = False
+        self.id = ""
+
+    def openSocket(self):
+        print("Opening Socket")
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.connect((self.TCP_IP, self.TCP_PORT))
 
     # Closes the socket
     def closeSocket(self):
@@ -31,8 +37,7 @@ class FileTransferClient(Thread):
 
         # Try to open the socket and ping the server
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.connect((self.TCP_IP, self.TCP_PORT))
+            self.openSocket()
             self.sock.send(b"status")
             status = self.sock.recv(self.BUFFER_SIZE)
             
@@ -59,6 +64,13 @@ class FileTransferClient(Thread):
         ftpPort.connect((self.TCP_IP, self.TCP_FTP_PORT))
         print("%s: FTP connection established to (%s, %s)" %(self.TCP_IP, str(self.TCP_IP), str(self.TCP_FTP_PORT)))
         return ftpPort
+
+    # send a new user name to the server, used in send_name() function in stream.py
+    def send_name_to_server(self, user_name):
+        self.sock.send(b"set new user name")
+        time.sleep(0.5)
+        self.sock.send(user_name.encode())
+        self.closeThread()
 
     # Send the image file to the server
     def run(self):
@@ -99,3 +111,10 @@ class FileTransferClient(Thread):
         # Get the id of the image sent
         self.id = str(self.sock.recv(self.BUFFER_SIZE), 'utf-8')
         print("Your id is: ", id)
+        
+        if (self.id != "None" and self.id != ""):
+            print("Your id is: ", self.id)
+            self.closeThread()
+
+        # need to keep the thread open until closing the window
+        # self.closeThread()

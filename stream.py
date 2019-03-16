@@ -4,6 +4,8 @@ import PIL
 from PIL import Image, ImageTk
 import FileTransferClient
 import numpy as np
+from time import sleep
+from threading import Thread
 
 IMAGE_PADDING_X = 10
 IMAGE_PADDING_Y_UP = 50
@@ -19,10 +21,23 @@ TCP_FTP_PORT    = 3000
 # The boolean to dictate if the GUI takes an image
 isCaptureImage = False
 didTakeImage = False
+isConnected = False
+Shutdown = False
+sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
-sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT,1024, "savedImage.jpg")
-isConnected = sendImageThread.makeConnection()
+def thread_image_function():
+
+	global isConnected
+	global Shutdown
+	global sendImageThread
+    
+	while not isConnected and not Shutdown:	
+		isConnected = sendImageThread.makeConnection()
+		if isConnected == False:
+			sleep(0.5)
+		print("Trying to reconnect")
+	print("Broke out of the while loop")
 
 # variables for writing images
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -47,6 +62,8 @@ root = Tk()
 
 # Closing function, also closes FCHANGE
 def close():
+    global Shutdown
+    Shutdown = True
     sendImageThread.closeSocket()
     root.quit()
 
@@ -89,6 +106,42 @@ def getROI(frame, x1, y1, x2, y2):
     height, width, _ = frame.shape
     return frame[max(0, y1):min(height, y2), max(0, x1):min(width, x2)]
 
+# function to send the new user's id to the server
+# runs after the user types in their name
+def send_name():
+    # get the name from the entry box the user typed in
+    user_name = name_entry.get()
+    sendImageThread.id = user_name
+    
+    # send this name/id to the server
+    sendImageThread.send_name_to_server(user_name)
+    
+    entry_box.destroy()
+
+# creates a thread to run the send_name function, so the UI won't hang
+def send_name_thread():
+    nameThread = Thread(target = send_name)
+    nameThread.start()
+
+# bring up a text box to have the new user enter their name
+def enter_user_name():
+    # create a new window where the name will be entered
+    global entry_box
+    entry_box = Toplevel(root)
+    entry_box.wm_title("New User")
+    
+    Label(entry_box, text = "Enter your name").grid(row = 0)
+    global name_entry
+    name_entry = Entry(entry_box)
+    name_entry.grid(row = 0, column = 1)
+    
+    # id will be changed later, when the user enters their name
+    sendImageThread.id = ""
+    
+    # create a button labeled enter; when pressed the window will close, and send the name to the server
+    Button(entry_box, text = "Enter", command = send_name_thread).grid(row = 3, column = 1, sticky = W, pady = 3)
+  
+
 def show_frame():
     global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor
     imageText = ""
@@ -128,7 +181,12 @@ def show_frame():
         didTakeImage = True
 
         # Start the thread and send the image
-        sendImageThread.start()
+        if not sendImageThread.isDone:
+            sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
+            sendImageThread.openSocket()
+            sendImageThread.start()
+        else:
+            sendImageThread.start()
 
     # If there is no connection to the server notify the user
     elif not isConnected:
@@ -140,8 +198,12 @@ def show_frame():
         if sendImageThread.isAlive():
             imageText = "Status: Sending image to server"
         else:
-            if sendImageThread.id != None:
+            if sendImageThread.id != "None" and sendImageThread.id != "":
                 imageText = "Status: Your name is " + sendImageThread.id
+            elif sendImageThread.id == "None":
+                # id is none, have user enter their name, save in id
+                imageText = "Status: New user"
+                enter_user_name()
             elif didTakeImage:
                 imageText = "Status: Image sent to server"
             else:
@@ -161,6 +223,10 @@ def show_frame():
     
     # Calls this function after a given interval
     imageBox.after(int(1000/60), show_frame)
+
+# Start thread for connecting thread function
+thread = Thread(target = thread_image_function)
+thread.start()
 
 # Call show frame to start the loop
 show_frame()
