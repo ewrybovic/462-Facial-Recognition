@@ -78,6 +78,7 @@ class ClientThread(Thread):
         #make a socket and listn, then return the socket
         ftpTransSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ftpTransSock.bind(('', self.ftp_port))
+        print("%s: Listening for FTP connection on port: %s" %(self.ip, self.ftp_port))
         while True:
             ftpTransSock.listen()
             ftpConnSock, addr = ftpTransSock.accept()

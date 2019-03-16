@@ -23,7 +23,7 @@ isCaptureImage = False
 didTakeImage = False
 isConnected = False
 Shutdown = False
-sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
+sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
 def thread_image_function():
@@ -182,7 +182,7 @@ def show_frame():
 
         # Start the thread and send the image
         if not sendImageThread.isDone:
-            sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, 1024, "savedImage.jpg")
+            sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
             sendImageThread.openSocket()
             sendImageThread.start()
         else:
