@@ -23,6 +23,7 @@ isCaptureImage = False
 didTakeImage = False
 isConnected = False
 Shutdown = False
+isFound = True
 sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
@@ -52,7 +53,7 @@ face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 # Set the width and the height of the frame
 width, height = 1280, 720
 
-# Create the video capture and set the widht and height
+# Create the video capture and set the width and height
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -67,7 +68,7 @@ def close():
     sendImageThread.closeSocket()
     root.quit()
 
-# binf the escape key to quit the GUI
+# bind the escape key to quit the GUI
 root.bind('<Escape>', lambda e: close())
 
 # Creates the image widget in the form of a label lol
@@ -95,7 +96,7 @@ fileMenu.add_command(label = "Quit", command = close)
 # Add submenu to the menu bar
 menubar.add_cascade(label = "File", menu = fileMenu)
 
-# Add the emnubar to the root
+# Add the menubar to the root
 root.config(menu = menubar)
 
 # handle exit through GUI X FCHANGE
@@ -143,12 +144,12 @@ def enter_user_name():
   
 
 def show_frame():
-    global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor
+    global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor, isFound
     imageText = ""
     foundFace = False
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
-
+	
     # Detect if a face is in the frame
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray_frame, 1.3, 5)
@@ -175,18 +176,23 @@ def show_frame():
             faceFrame = getROI(frame, x1, y1, x2, y2)
             faceFrame = cv2.resize(faceFrame, (IMAGE_SIZE, IMAGE_SIZE))
             cv2.imwrite("savedImage.jpg", faceFrame)
+            # Start the thread and send the image
+            isCaptureImage = False
+            didTakeImage = True
+            isFound = True
+            if not sendImageThread.isDone:
+                sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
+                sendImageThread.openSocket()
+                sendImageThread.start()
+            else:
+                sendImageThread.start()
         else:
             cv2.imwrite("savedImage.jpg", frame)
-        isCaptureImage = False
-        didTakeImage = True
-
-        # Start the thread and send the image
-        if not sendImageThread.isDone:
-            sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
-            sendImageThread.openSocket()
-            sendImageThread.start()
-        else:
-            sendImageThread.start()
+            isCaptureImage = False
+            didTakeImage = False
+            isFound = False
+            sendImageThread.id = ""
+        
 
     # If there is no connection to the server notify the user
     elif not isConnected:
@@ -206,6 +212,8 @@ def show_frame():
                 enter_user_name()
             elif didTakeImage:
                 imageText = "Status: Image sent to server"
+            elif not isFound:
+                imageText = "Status: Cannot detect a face, try again"
             else:
                 imageText = "Status: idle" 
 
