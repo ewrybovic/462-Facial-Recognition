@@ -116,7 +116,12 @@ def CleanBackground(img, debug=True, erode_mask=False, erode_image=True):
 	return blendMaskAndImage(img, mask)
 
 if __name__ == '__main__':
-	img = CleanBackground(cv2.imread('Evan.jpg'))
+	img = CleanBackground(cv2.imread('Evan.jpg'), debug=False)
+	cv2.imwrite('output.jpg', img)
+	cv2.imshow('output', img)
+	cv2.waitKey()
+	img = cv2.resize(img, (96, 96))
+	cv2.imwrite('output.jpg', img)
 	cv2.imshow('output', img)
 	cv2.waitKey()
 
