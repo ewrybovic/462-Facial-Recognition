@@ -65,7 +65,6 @@ class ClientThread(Thread):
             print("%s: File opened" %self.ip)
             while True:
                 data = ftpSock.recv(BUFFER_SIZE)                
-                data = self.sock.recv(BUFFER_SIZE)
                 if not data or data == b'1':
                     f.close()
                     print("%s: Data received, closing file" %self.ip)

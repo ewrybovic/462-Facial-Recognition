@@ -22,11 +22,13 @@ Points
  - 61-68 is inner lip outline
 '''
 
+#have a draw frame function, draw the rect, the shapes features
+# have the x, y coord top corner bottom corner, found face is a boolean
 class facialLandmarks:
 
-	def __init__(self):
+	def __init__(self): # debug mode show everything else only rectangle 
 		self.landmarkFile = "shape_predictor_68_face_landmarks.dat"
-		self.detector = dlib.get_frontal_face_detector()
+		self.faceDetector = dlib.get_frontal_face_detector()
 		self.predictor = dlib.shape_predictor(self.landmarkFile)
 		self.landmarks = self.get_facial_landmarks()
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
@@ -35,29 +37,29 @@ class facialLandmarks:
 		# change to 0 for obama picture
 		image_file = dir_name + image_names[0]
 		# open image
-		imgg = cv2.imread(image_file)
+		img = cv2.imread(image_file)
 		# Converting the image to gray scale
-		gray = cv2.cvtColor(imgg, cv2.COLOR_BGR2GRAY)
+		gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 			
 		# Get faces into webcam's image
-		rects = detector(imgg, 0)
+		rects = detector(img, 0)
 		# For each detected face, find the landmark.
 		for (i, rect) in enumerate(rects):
 			# Make the prediction and transfom it to numpy array
-			landmarks = predictor(imgg, rect)
+			landmarks = predictor(img, rect)
 			landmarks = face_utils.shape_to_np(landmarks)
 
 			# Draw on our image, all the finded cordinate points (x,y) 
 			""" for (x, y) in landmarks:
-				cv2.circle(imgg, (x, y), 2, (0, 255, 0), -1)
+				cv2.circle(img, (x, y), 2, (0, 255, 0), -1)
 			print("Image %s x, y array: " %(i))
 			print(landmarks) """
 
 		# Show the image, uncomment line 36-38 and comment out 39 for resizing 
 		#cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-		#img_resize = cv2.resize(imgg, (960, 1266))
+		#img_resize = cv2.resize(img, (960, 1266))
 		#cv2.imshow("image", img_resize)
-		""" cv2.imshow("image", imgg)
+		""" cv2.imshow("image", img)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows() """
 
@@ -66,11 +68,6 @@ class facialLandmarks:
 	def get_specific_facial_Landmark(self, landmark):
 		if (landmark == "hello"):
 			pass
-
-
-
-
-
-facialLandmarks =  
+ 
 
 print(fl.getFacialLandmarks(str(dir_name + image_names[1])))
