@@ -35,7 +35,7 @@ class FacialLandmarks:
 		# Should not get land marks in constructor
 		#self.landmarks = self.get_facial_landmarks()
 
-		self.landmarks = None
+		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
 	
 	def get_facial_landmarks(self, img):
@@ -90,7 +90,7 @@ class FacialLandmarks:
 	# Returns in list [img, height, width]
 	def get_height_width(self, img, recalc_landmarks = False, draw_on_image = False):
 		# Get landmarks if none exists or if user wants to recalc image
-		if self.landmarks == None or calc_landmarks:
+		if len(self.landmarks) == 0 or recalc_landmarks:
 			self.get_facial_landmarks(img)
 
 		# Get facial features
