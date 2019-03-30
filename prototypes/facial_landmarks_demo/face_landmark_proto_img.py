@@ -2,6 +2,7 @@ from imutils import face_utils
 import dlib
 import cv2
 import math
+import enum
 
 #GLOBAL
 dir_name = 'images/'
@@ -22,6 +23,21 @@ Points
 49 - 60 is outer lip outline
  - 61-68 is inner lip outline
 '''
+# enum in python, gives you the start/stop  for the features in self.landmarks, chnage enums to single int 
+class facialLandmarkType(enum.Enum):
+		#basic
+		jawline = (1,17)
+		leftEyebrow = (18, 22)
+		rightEyeBrow = (23, 27)
+		nose = (28, 31)
+		leftEye = (37, 42)
+		rightEye = (43, 48)
+		mouth = (49, 68)
+		# specific
+		top = 27
+		bot = 8
+		left = 0
+		right = 16
 
 #have a draw frame function, draw the rect, the shapes features
 # have the x, y coord top corner bottom corner, found face is a boolean
@@ -82,8 +98,29 @@ class FacialLandmarks:
 
 	
 	def get_specific_facial_Landmark(self, landmark):
-		if (landmark == "hello"):
-			pass
+		if (landmark == facialLandmarkType.top):
+			return self.landmarks[27]
+		if (landmark == facialLandmarkType.bot):
+			return self.landmarks[8]
+		if (landmark == facialLandmarkType.left):
+			return self.landmarks[0]
+		if (landmark == facialLandmarkType.right):
+			return self.landmarks[16]
+		#---
+		if (landmark == facialLandmarkType.jawline):
+			return self.landmarks[0:16]
+		if (landmark == facialLandmarkType.leftEyebrow):
+			return self.landmarks[17:21]
+		if (landmark == facialLandmarkType.rightEyeBrow):
+			return self.landmarks[22:26]
+		if (landmark == facialLandmarkType.nose):
+			return self.landmarks[27:30]
+		if (landmark == facialLandmarkType.leftEye):
+			return self.landmarks[36:41]
+		if (landmark == facialLandmarkType.rightEye):
+			return self.landmarks[42:47]
+		if (landmark == facialLandmarkType.mouth):
+			return self.landmarks[48:67]
 
 
 	# Gets the height and width of the face
@@ -94,10 +131,10 @@ class FacialLandmarks:
 			self.get_facial_landmarks(img)
 
 		# Get facial features
-		top = self.landmarks[27]
-		bot = self.landmarks[8]
-		left = self.landmarks[0]
-		right = self.landmarks[16]
+		top = self.get_specific_facial_Landmark(facialLandmarkType.top)
+		bot = self.get_specific_facial_Landmark(facialLandmarkType.bot)
+		left = self.get_specific_facial_Landmark(facialLandmarkType.left)
+		right = self.get_specific_facial_Landmark(facialLandmarkType.right)
 
 		# Calculate hight and width
 		height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
@@ -111,10 +148,18 @@ class FacialLandmarks:
 			cv2.line(img, (right[0], right[1]), (left[0], left[1]), (255, 0, 0), 2)
 			cv2.putText(img, "height: " + str(height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
 			cv2.putText(img, "width: " + str(width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
+			self.drawLandmarks(cv2, img)
 			return (img, height, width)
 		else:
 			return (height, width)
+	
+	def drawFaceFrame(self):
+		# get top, bot, left, right landmarks and draw a bo around it 
+		pass
 
+	def drawLandmarks(self, imgDraw, img):
+		for (x, y) in self.landmarks:
+			imgDraw.circle(img, (x, y), 2, (0, 255, 0), -1)
  
 if __name__ == "__main__":
 	fl = FacialLandmarks()
