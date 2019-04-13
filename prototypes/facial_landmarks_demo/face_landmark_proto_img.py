@@ -51,6 +51,12 @@ class FacialLandmarks:
 		self.predictor = dlib.shape_predictor(self.landmarkFile)
 		# Should not get land marks in constructor
 		#self.landmarks = self.get_facial_landmarks()
+		self.height = 0
+		self.width = 0
+		self.top = [0,0]
+		self.bot = [0,0]
+		self.right = [0,0]
+		self.left = [0,0]
 
 		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
@@ -133,34 +139,39 @@ class FacialLandmarks:
 
 	# Draws width and hieght on image
 	def draw_on_image(self, img):
+		if len(self.landmarks) == 0:
+			return None
+
 		if type(img) == str:
 				img = cv2.imread(img)
 
-		cv2.line(img, (bot[0], bot[1]), (top[0], top[1]), (255, 0, 0), 2)
-		cv2.line(img, (right[0], right[1]), (left[0], left[1]), (255, 0, 0), 2)
-		cv2.putText(img, "height: " + str(height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
-		cv2.putText(img, "width: " + str(width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
+		cv2.line(img, (self.bot[0], self.bot[1]), (self.top[0], self.top[1]), (255, 0, 0), 2)
+		cv2.line(img, (self.right[0], self.right[1]), (self.left[0], self.left[1]), (255, 0, 0), 2)
+		cv2.putText(img, "height: " + str(self.height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
+		cv2.putText(img, "width: " + str(self.width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
 
 		return img
 
 	# Gets the height and width of the face
 	# Returns in list [img, height, width]
-	def get_height_width(self, img, recalc_landmarks = False, draw_on_image = False):
+	def get_height_width(self, img, recalc_landmarks = False):
 		# Get landmarks if none exists or if user wants to recalc image
 		if len(self.landmarks) == 0 or recalc_landmarks:
 			self.get_facial_landmarks(img)
 
 		# If the landmarks is still 0, then there wasn't a face
-		if len(self.landmarks) == 0:
+		if len(self.landmarks) != 0:
 			# Get facial features
-			top = self.landmarks[27]
-			bot = self.landmarks[8]
-			left = self.landmarks[0]
-			right = self.landmarks[16]
+			self.top = self.landmarks[27]
+			self.bot = self.landmarks[8]
+			self.left = self.landmarks[0]
+			self.right = self.landmarks[16]
 
 			# Calculate hight and width
-			self.height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
-			self.width = self.calculateDistance(left[0], left[1], right[0], right[1])
+			self.height = self.calculateDistance(self.top[0], self.top[1], self.bot[0], self.bot[1])
+			print(self.height)
+			self.width = self.calculateDistance(self.left[0], self.left[1], self.right[0], self.right[1])
+			print(self.width)
 
 
 	def drawLandmarks(self, imgDraw, img):
@@ -169,6 +180,7 @@ class FacialLandmarks:
  
 if __name__ == "__main__":
 	fl = FacialLandmarks()
-	img, _, _ = fl.get_height_width(str(dir_name + image_names[0]), draw_on_image=True)
+	fl.get_height_width(str(dir_name + image_names[0]), recalc_landmarks = True)
+	img = fl.draw_on_image(str(dir_name + image_names[0]))
 	cv2.imshow("Out", img)
 	cv2.waitKey(0)
