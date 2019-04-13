@@ -33,6 +33,11 @@ class FaceNetServer():
             print("Server: killing thread " + str(thread.ident))
             thread.shutdown = True
 
+    def removeClosedThreads(self):
+        for thread in self.threads:
+            if thread.shutdown:
+                self.threads.remove(thread)
+
     def waitForConnections(self):
         # Start the server
         print("Starting Server", self.ip + ":", self.port)
@@ -41,11 +46,12 @@ class FaceNetServer():
         tcpsock.bind((self.ip, self.port))
 
         # Adding a timeout to the server so the while conditional can be checked
-        tcpsock.settimeout(1)
+        tcpsock.settimeout(0.25)
         print("Server: Waiting for connections...")
 
         while not self.shutdown:
             try:
+                self.removeClosedThreads()
                 tcpsock.listen(5)
                 (client_conn, (client_ip, client_port)) = tcpsock.accept()
                 print("Server: Connection from", (client_ip, client_port))
