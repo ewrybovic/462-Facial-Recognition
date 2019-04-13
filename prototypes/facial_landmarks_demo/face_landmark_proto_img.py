@@ -122,37 +122,6 @@ class FacialLandmarks:
 			return self.landmarks[42:47]
 		if (landmark == facialLandmarkType.mouth):
 			return self.landmarks[48:67]
-
-
-	# Gets the height and width of the face
-	# Returns in list [img, height, width]
-	def get_height_width(self, img, recalc_landmarks = False, draw_on_image = False):
-		# Get landmarks if none exists or if user wants to recalc image
-		if len(self.landmarks) == 0 or recalc_landmarks:
-			self.get_facial_landmarks(img)
-
-		# Get facial features
-		top = self.get_specific_facial_Landmark(facialLandmarkType.top)
-		bot = self.get_specific_facial_Landmark(facialLandmarkType.bot)
-		left = self.get_specific_facial_Landmark(facialLandmarkType.left)
-		right = self.get_specific_facial_Landmark(facialLandmarkType.right)
-
-		# Calculate hight and width
-		height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
-		width = self.calculateDistance(left[0], left[1], right[0], right[1])
-
-		if draw_on_image:
-			if type(img) == str:
-				img = cv2.imread(img)
-
-			cv2.line(img, (bot[0], bot[1]), (top[0], top[1]), (255, 0, 0), 2)
-			cv2.line(img, (right[0], right[1]), (left[0], left[1]), (255, 0, 0), 2)
-			cv2.putText(img, "height: " + str(height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
-			cv2.putText(img, "width: " + str(width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
-			self.drawLandmarks(cv2, img)
-			return (img, height, width)
-		else:
-			return (height, width)
 	
 	def drawFaceFrame(self):
 		# get top, bot, left, right landmarks and draw a bo around it 
