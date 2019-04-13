@@ -34,6 +34,8 @@ class FacialLandmarks:
 		self.predictor = dlib.shape_predictor(self.landmarkFile)
 		# Should not get land marks in constructor
 		#self.landmarks = self.get_facial_landmarks()
+		self.width = 0
+		self.height = 0
 
 		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
@@ -85,6 +87,17 @@ class FacialLandmarks:
 		if (landmark == "hello"):
 			pass
 
+	# Draws width and hieght on image
+	def draw_on_image(self, img):
+		if type(img) == str:
+				img = cv2.imread(img)
+
+		cv2.line(img, (bot[0], bot[1]), (top[0], top[1]), (255, 0, 0), 2)
+		cv2.line(img, (right[0], right[1]), (left[0], left[1]), (255, 0, 0), 2)
+		cv2.putText(img, "height: " + str(height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
+		cv2.putText(img, "width: " + str(width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
+
+		return img
 
 	# Gets the height and width of the face
 	# Returns in list [img, height, width]
@@ -93,27 +106,17 @@ class FacialLandmarks:
 		if len(self.landmarks) == 0 or recalc_landmarks:
 			self.get_facial_landmarks(img)
 
-		# Get facial features
-		top = self.landmarks[27]
-		bot = self.landmarks[8]
-		left = self.landmarks[0]
-		right = self.landmarks[16]
+		# If the landmarks is still 0, then there wasn't a face
+		if len(self.landmarks) == 0:
+			# Get facial features
+			top = self.landmarks[27]
+			bot = self.landmarks[8]
+			left = self.landmarks[0]
+			right = self.landmarks[16]
 
-		# Calculate hight and width
-		height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
-		width = self.calculateDistance(left[0], left[1], right[0], right[1])
-
-		if draw_on_image:
-			if type(img) == str:
-				img = cv2.imread(img)
-
-			cv2.line(img, (bot[0], bot[1]), (top[0], top[1]), (255, 0, 0), 2)
-			cv2.line(img, (right[0], right[1]), (left[0], left[1]), (255, 0, 0), 2)
-			cv2.putText(img, "height: " + str(height), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
-			cv2.putText(img, "width: " + str(width), (0, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 1, cv2.LINE_AA)
-			return (img, height, width)
-		else:
-			return (height, width)
+			# Calculate hight and width
+			self.height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
+			self.width = self.calculateDistance(left[0], left[1], right[0], right[1])
 
  
 if __name__ == "__main__":
