@@ -153,7 +153,7 @@ class FacialLandmarks:
 		else:
 			return (height, width)
 	
-	def drawFaceFrame(self):
+	def drawFaceFrame(self, top, bot, ):
 		# get top, bot, left, right landmarks and draw a bo around it 
 		pass
 
