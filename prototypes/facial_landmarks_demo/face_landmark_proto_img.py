@@ -192,9 +192,14 @@ class FacialLandmarks:
 			# Calculate hight and width
 			self.height = self.calculateDistance(top[0], top[1], bot[0], bot[1])
 			self.width = self.calculateDistance(left[0], left[1], right[0], right[1])
+
+
+	def drawLandmarks(self, imgDraw, img):
+		for (x, y) in self.landmarks:
+			imgDraw.circle(img, (x, y), 2, (0, 255, 0), -1)
  
 if __name__ == "__main__":
 	fl = FacialLandmarks()
 	img, _, _ = fl.get_height_width(str(dir_name + image_names[0]), draw_on_image=True)
 	cv2.imshow("Out", img)
-cv2.waitKey(0)
+	cv2.waitKey(0)
