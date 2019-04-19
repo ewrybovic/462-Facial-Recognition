@@ -175,6 +175,7 @@ def show_frame():
 
     # Draw the box around the face if found
     if faceLandmarks.faceFound:
+        foundFace = True
         faceLandmarks.get_height_width(displayFrame)
         displayFrame = faceLandmarks.draw_face_frame(displayFrame)
 
@@ -185,7 +186,7 @@ def show_frame():
 
         # Check if there was a face in the frame before saving image
         if foundFace:
-            faceFrame = getROI(frame, x1, y1, x2, y2)
+            faceFrame = getROI(frame, faceLandmarks.x1, faceLandmarks.y1, faceLandmarks.x2, faceLandmarks.y2)
             faceFrame = cv2.resize(faceFrame, (IMAGE_SIZE, IMAGE_SIZE))
             cv2.imwrite("savedImage.jpg", faceFrame)
             # Start the thread and send the image

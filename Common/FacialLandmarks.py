@@ -65,6 +65,11 @@ class FacialLandmarks:
 		self.left = [0,0]
 		self.faceFound = False
 
+		self.x1 = 0
+		self.y1 = 0
+		self.x2 = 0
+		self.y2 = 0
+
 		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
 		
@@ -185,11 +190,11 @@ class FacialLandmarks:
 		if type(img) == str:
 				img = cv2.imread(img)
 
-		x1 = int(self.left[0] - self.width/3.75)
-		y1 = int(self.top[1] - self.height/1.1)
-		x2 = int(self.right[0] + self.width/3.75)
-		y2 = int(self.bot[1] + self.height/4)
-		cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
+		self.x1 = int(self.left[0] - self.width/3.75)
+		self.y1 = int(self.top[1] - self.height/1.1)
+		self.x2 = int(self.right[0] + self.width/3.75)
+		self.y2 = int(self.bot[1] + self.height/4)
+		cv2.rectangle(img, (self.x1, self.y1), (self.x2, self.y2), (255, 0, 0), 2)
 
 		return img
 
