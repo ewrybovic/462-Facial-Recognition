@@ -44,10 +44,9 @@ class facialLandmarkType(enum.Enum):
 # have the x, y coord top corner bottom corner, found face is a boolean
 class FacialLandmarks:
 
-	def __init__(self): # debug mode show everything else only rectangle 
-
-		# If the script gets called by the stream then point to the correct location
-		if __name__ == "Common.FacialLandmarks":
+	def __init__(self, fromClient = True): # debug mode show everything else only rectangle 
+		# If the script gets called by the client then point to the correct location
+		if fromClient:
 			self.landmarkFile = "Common/shape_predictor_68_face_landmarks.dat"
 		else:
 			# If the script gets called from the server, need to test this later
@@ -68,7 +67,7 @@ class FacialLandmarks:
 
 		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
-		print(__name__)
+		
 	
 	def get_facial_landmarks(self, img):
 		# change to 0 for obama picture
