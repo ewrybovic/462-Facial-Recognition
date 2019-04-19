@@ -6,6 +6,9 @@ import FileTransferClient
 import numpy as np
 from time import sleep
 from threading import Thread
+from Common.FacialLandmarks import FacialLandmarks
+
+faceLandmarks = FacialLandmarks()
 
 IMAGE_PADDING_X = 10
 IMAGE_PADDING_Y_UP = 50
@@ -157,14 +160,23 @@ def show_frame():
     # Move the frame to a new variable to remove the blue border
     displayFrame = cv2.copyMakeBorder(frame, 0,0,0,0, cv2.BORDER_REPLICATE)
 
+    # Comment out for now while the new face detector gets worked on
     # Loop over the faces found and draw a rectangle
-    for (x, y, w, h) in faces:
+    '''for (x, y, w, h) in faces:
         foundFace = True
         x1 = x - IMAGE_PADDING_X
         y1 = y - IMAGE_PADDING_Y_UP
         x2 = x + w + IMAGE_PADDING_X
         y2 = y + h + IMAGE_PADDING_Y_DOWN
-        cv2.rectangle(displayFrame, (x1, y1), (x2, y2), (255, 0, 0), lineType)
+        cv2.rectangle(displayFrame, (x1, y1), (x2, y2), (255, 0, 0), lineType)'''
+
+    # Get the height and width of the face
+    faceLandmarks.get_facial_landmarks(displayFrame)
+
+    # Draw the box around the face if found
+    if faceLandmarks.faceFound:
+        faceLandmarks.get_height_width(displayFrame)
+        displayFrame = faceLandmarks.draw_face_frame(displayFrame)
 
     # Take a picture if the button has been pressed
     if isCaptureImage and isConnected:
