@@ -5,6 +5,11 @@ from sys import platform
 import os
 import sqlite3
 
+# Import the FacialLandmarks file from parent directory, kinda hacky
+import sys
+sys.path.append("../")
+from Common.FacialLandmarks import FacialLandmarks
+
 BUFFER_SIZE = 1024
 
 class ClientThread(Thread):
@@ -22,6 +27,7 @@ class ClientThread(Thread):
         self.shutdown = False
         self.recompile = False
         self.ftp_port = ftp_port
+        self.faceLandmarks = FacialLandmarks(fromClient=False)
         	
         print(ip +": New thread started for "+ ip + ":", str(port))
         
@@ -75,6 +81,11 @@ class ClientThread(Thread):
         print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
         print("%s: Successfully closed file" %self.ip)
+        try:
+            # Get the height and width of the face in the frame
+            self.faceLandmarks.get_height_width(filename)
+        except Exception as e:
+            print("Error: ", e)
         self.findIdentity(filename)
 
     # Runs the model to find the identity of the person
