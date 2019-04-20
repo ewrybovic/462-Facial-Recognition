@@ -6,6 +6,11 @@ import os
 import sqlite3
 from BackgroundCleaner import *
 
+# Import the FacialLandmarks file from parent directory, kinda hacky
+import sys
+sys.path.append("../")
+from Common.FacialLandmarks import FacialLandmarks
+
 BUFFER_SIZE = 1024
 
 class ClientThread(Thread):
@@ -24,6 +29,7 @@ class ClientThread(Thread):
         self.recompile = False
         self.useBackgroundRemover = False
         self.ftp_port = ftp_port
+        self.faceLandmarks = FacialLandmarks(fromClient=False)
         	
         print(ip +": New thread started for "+ ip + ":", str(port))
         
@@ -76,7 +82,12 @@ class ClientThread(Thread):
                 f.write(data)
         print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
-        print("%s: Successfully closed file" %self.ip)
+    
+        try:
+            # Get the height and width of the face in the frame
+            self.faceLandmarks.get_height_width(filename)
+        except Exception as e:
+            print("Error: ", e)
         
         # remove image background after image is received but before it moves into the facial recognition model
         if self.useBackgroundRemover:
@@ -86,7 +97,7 @@ class ClientThread(Thread):
             self.findIdentity(filename)
         else:
             self.findIdentity(filename)
-    
+
     # Runs the model to find the identity of the person
     def findIdentity(self, filename):
         print("%s: Finding ID" %self.ip)
