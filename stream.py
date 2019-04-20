@@ -27,6 +27,7 @@ didTakeImage = False
 isConnected = False
 Shutdown = False
 isFound = True
+isDebugEnabled = False
 sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
@@ -46,6 +47,7 @@ def thread_image_function():
 # variables for writing images
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCorner = (10, 700)
+upperBottomLeftCorner = (10, 650)
 fontScale = 1
 fontColor = (255, 255, 255)
 lineType = 2
@@ -83,6 +85,18 @@ def captureImage():
     global isCaptureImage
     isCaptureImage = True
 
+# when debug mode 
+def enableDebug():
+    global isDebugEnabled
+    if not isDebugEnabled:
+        print ("debug enabled")
+        isDebugEnabled = True
+
+    else:
+        print ("debug disabled")
+        isDebugEnabled = False
+    pass
+
 # Button to capture the image
 captureButton = Button(root, text="Capture", command=captureImage)
 captureButton.pack(side=RIGHT, padx=5, pady=5)
@@ -93,6 +107,7 @@ menubar = Menu(root)
 # Create the submenu
 fileMenu = Menu(menubar, tearoff=0)
 fileMenu.add_command(label = "Capture Image", command = captureImage)
+fileMenu.add_command(label = "Debug Mode", command = enableDebug)
 fileMenu.add_command(label = "Check Connection to server")
 fileMenu.add_command(label = "Quit", command = close)
 
@@ -102,7 +117,7 @@ menubar.add_cascade(label = "File", menu = fileMenu)
 # Add the menubar to the root
 root.config(menu = menubar)
 
-# handle exit through GUI X FCHANGE
+# handle exit through GUI X 
 root.protocol("WM_DELETE_WINDOW", close)
 
 # Returns the image of only the face
@@ -172,6 +187,15 @@ def show_frame():
 
     # Get the height and width of the face
     faceLandmarks.get_facial_landmarks(displayFrame)
+    
+    # display facial landmarks and other debug info to screen
+    if isDebugEnabled:
+        # Write the status to the image
+        imageText = "Debug Mode Enabled"
+        cv2.putText(displayFrame, imageText, upperBottomLeftCorner, font, fontScale, fontColor, lineType)
+        img = Image.fromarray(displayFrame)
+        faceLandmarks.draw_on_image(displayFrame)
+        faceLandmarks.drawLandmarks(cv2, displayFrame)
 
     # Draw the box around the face if found
     if faceLandmarks.faceFound:

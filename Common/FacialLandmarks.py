@@ -143,10 +143,6 @@ class FacialLandmarks:
 			return self.landmarks[42:47]
 		if (landmark == facialLandmarkType.mouth):
 			return self.landmarks[48:67]
-	
-	def drawFaceFrame(self):
-		# get top, bot, left, right landmarks and draw a bo around it 
-		pass
 
 	def drawLandmarks(self, imgDraw, img):
 		for (x, y) in self.landmarks:
@@ -197,10 +193,6 @@ class FacialLandmarks:
 		cv2.rectangle(img, (self.x1, self.y1), (self.x2, self.y2), (255, 0, 0), 2)
 
 		return img
-
-	def drawLandmarks(self, imgDraw, img):
-		for (x, y) in self.landmarks:
-			imgDraw.circle(img, (x, y), 2, (0, 255, 0), -1)
  
 if __name__ == "__main__":
 	fl = FacialLandmarks()
