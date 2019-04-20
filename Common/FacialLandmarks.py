@@ -72,7 +72,6 @@ class FacialLandmarks:
 
 		self.landmarks = []
 		self.facial_landmarks_list = ["face_outline", "l_eyebrow", "r_eyebrow", "nose", "l_eye", "r_eye", "mouth"]
-		
 	
 	def get_facial_landmarks(self, img):
 		# change to 0 for obama picture
@@ -111,7 +110,6 @@ class FacialLandmarks:
 		 cv2.imshow("image", img)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows() '''
-
 
 	# Calculate the distance between two points
 	def calculateDistance(self, x1, y1, x2, y2):

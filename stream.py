@@ -91,11 +91,9 @@ def enableDebug():
     if not isDebugEnabled:
         print ("debug enabled")
         isDebugEnabled = True
-
     else:
         print ("debug disabled")
         isDebugEnabled = False
-    pass
 
 # Button to capture the image
 captureButton = Button(root, text="Capture", command=captureImage)
