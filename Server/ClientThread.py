@@ -4,6 +4,7 @@ from threading import Thread
 from sys import platform
 import os
 import sqlite3
+from BackgroundCleaner import *
 
 BUFFER_SIZE = 1024
 
@@ -21,6 +22,7 @@ class ClientThread(Thread):
         self.didDisconnect = False
         self.shutdown = False
         self.recompile = False
+        self.useBackgroundRemover = False
         self.ftp_port = ftp_port
         	
         print(ip +": New thread started for "+ ip + ":", str(port))
@@ -75,8 +77,16 @@ class ClientThread(Thread):
         print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
         print("%s: Successfully closed file" %self.ip)
-        self.findIdentity(filename)
-
+        
+        # remove image background after image is received but before it moves into the facial recognition model
+        if self.useBackgroundRemover:
+            # run the clean background function and save the image, then run the find identity function
+            file = CleanBackground(cv2.imread(filename), debug=False)
+            cv2.imwrite(filename, file)
+            self.findIdentity(filename)
+        else:
+            self.findIdentity(filename)
+    
     # Runs the model to find the identity of the person
     def findIdentity(self, filename):
         print("%s: Finding ID" %self.ip)
@@ -133,8 +143,8 @@ class ClientThread(Thread):
         
         self.database_flag = 0
         self.database_name = new_name
- 
-        # wilselfl let the server know it needs to recompile so the new user can be recognized
+        
+        # will let the server know it needs to recompile so the new user can be recognized
         self.recompile = True
 
     # Overall structure for the server

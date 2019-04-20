@@ -48,7 +48,12 @@ def createMask(edges, DEBUG=False, ERODE_MASK=False):
 	contour_info = []
 
 	# Find the contours in the image
-	_, contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    # changed to work with different versions of cv2
+	try:
+		_, contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+	except ValueError:
+        # previously I was getting ValueError: not enough values to unpack (expected 3, got 2)
+		contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
 	# add all of the contours into the list
 	for c in contours:
