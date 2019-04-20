@@ -82,6 +82,7 @@ class ClientThread(Thread):
                 f.write(data)
         print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
+        print("%s: Successfully closed file" %self.ip)
     
         try:
             # Get the height and width of the face in the frame
