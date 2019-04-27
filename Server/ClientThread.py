@@ -4,6 +4,7 @@ from threading import Thread
 from sys import platform
 import os
 import sqlite3
+from BackgroundCleaner import *
 
 # Import the FacialLandmarks file from parent directory, kinda hacky
 import sys
@@ -28,6 +29,7 @@ class ClientThread(Thread):
         self.didDisconnect = False
         self.shutdown = False
         self.recompile = False
+        self.useBackgroundRemover = False
         self.ftp_port = ftp_port
         self.faceLandmarks = FacialLandmarks(fromClient=False)
         	
@@ -92,7 +94,15 @@ class ClientThread(Thread):
 
         except Exception as e:
             print("Error: ", e)
-        self.findIdentity(filename)
+        
+        # remove image background after image is received but before it moves into the facial recognition model
+        if self.useBackgroundRemover:
+            # run the clean background function and save the image, then run the find identity function
+            file = CleanBackground(cv2.imread(filename), debug=False)
+            cv2.imwrite(filename, file)
+            self.findIdentity(filename)
+        else:
+            self.findIdentity(filename)
 
     # Runs the model to find the identity of the person
     def findIdentity(self, filename):
@@ -150,8 +160,8 @@ class ClientThread(Thread):
         
         self.database_flag = 0
         self.database_name = new_name
- 
-        # wilselfl let the server know it needs to recompile so the new user can be recognized
+        
+        # will let the server know it needs to recompile so the new user can be recognized
         self.recompile = True
 
     # Overall structure for the server
