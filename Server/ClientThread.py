@@ -4,7 +4,6 @@ from threading import Thread
 from sys import platform
 import os
 import sqlite3
-from BackgroundCleaner import *
 
 # Import the FacialLandmarks file from parent directory, kinda hacky
 import sys
@@ -19,6 +18,8 @@ class ClientThread(Thread):
         Thread.__init__(self)
         self.database_flag = 0
         self.database_name = ""
+        self.database_width = 0.0
+        self.database_height = 0.0
         self.model = model
         self.ip = ip
         self.port = port
@@ -27,33 +28,30 @@ class ClientThread(Thread):
         self.didDisconnect = False
         self.shutdown = False
         self.recompile = False
-        self.useBackgroundRemover = False
         self.ftp_port = ftp_port
         self.faceLandmarks = FacialLandmarks(fromClient=False)
         	
         print(ip +": New thread started for "+ ip + ":", str(port))
         
     #fuction used to add user to database or is used to lookup an already existing user
-    def database_fuct(self, id_, flag):
-        conn = sqlite3.connect('FacRecDatabase.db')
-        c = conn.cursor()   
- 
+    def database_fuct(self, id_, width, height,  flag):
+        conn = sqlite3.connect('FacRecData.db')
+        c = conn.cursor()
         if id_ == "":
             pass
         elif self.database_flag:     
-           
             lookup = (id_,)
             for row in c.execute('SELECT * FROM FaceRecInfo ORDER BY name'):
                print (row)
-            
-            print (c.fetchone())
-            
+            print (c.fetchone())   
         else:
-            name = (id_,)
-            c.execute('''INSERT INTO FaceRecInfo VALUES (?, 'Youtube.com')''', name)
+            values = [id_, width, height]
+            try:
+                c.execute('INSERT INTO FaceRecInfo (name, width, height) VALUES (?, ?, ?)',values)
+            except Exception as e:
+                print(e)
+
             conn.commit()
-            for row in c.execute('SELECT * FROM FaceRecInfo ORDER BY name'):
-               print (row)
         conn.close()   
 	
 
@@ -63,7 +61,7 @@ class ClientThread(Thread):
         print("%s: Closing Socket!!!" %self.ip)
         self.didDisconnect = True
         self.sock.close()
-        self.database_fuct(self.database_name, self.database_flag)
+        self.database_fuct(self.database_name, self.database_width, self.database_height, self.database_flag)
         
     # Read the data that comes from the client
     def readData(self):
@@ -83,21 +81,18 @@ class ClientThread(Thread):
         print("%s: Closed Server FTP connection (%s, %s)" %(self.ip, str(self.ip), str(self.ftp_port)))
         ftpSock.close()
         print("%s: Successfully closed file" %self.ip)
-    
         try:
             # Get the height and width of the face in the frame
             self.faceLandmarks.get_height_width(filename)
+            self.database_width = self.faceLandmarks.width
+            self.database_height = self.faceLandmarks.height
+            print("The width is:" , self.database_width)
+            print("The height is:" , self.database_height)
+            
+
         except Exception as e:
             print("Error: ", e)
-        
-        # remove image background after image is received but before it moves into the facial recognition model
-        if self.useBackgroundRemover:
-            # run the clean background function and save the image, then run the find identity function
-            file = CleanBackground(cv2.imread(filename), debug=False)
-            cv2.imwrite(filename, file)
-            self.findIdentity(filename)
-        else:
-            self.findIdentity(filename)
+        self.findIdentity(filename)
 
     # Runs the model to find the identity of the person
     def findIdentity(self, filename):
@@ -155,8 +150,8 @@ class ClientThread(Thread):
         
         self.database_flag = 0
         self.database_name = new_name
-        
-        # will let the server know it needs to recompile so the new user can be recognized
+ 
+        # wilselfl let the server know it needs to recompile so the new user can be recognized
         self.recompile = True
 
     # Overall structure for the server

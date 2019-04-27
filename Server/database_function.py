@@ -1,12 +1,14 @@
 import sqlite3
-conn = sqlite3.connect('FacRecDatabase.db')
+conn = sqlite3.connect('FacRecData.db')
 c = conn.cursor()
 
 data = int(input("Enter (1) to initailize db, (2) to check db (3) to delete from db:"))
 
 if data == 1:
 # initialize
-   c.execute('''CREATE TABLE FaceRecInfo (name, website)''')
+
+#Ive tried changing this to (name text, width real, height real)
+   c.execute('''CREATE TABLE FaceRecInfo (name, width, height)''')
 
    conn.commit()
    conn.close()
