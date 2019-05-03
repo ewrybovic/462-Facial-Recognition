@@ -131,7 +131,7 @@ class ClientThread(Thread):
         ftpTransSock.bind(('', self.ftp_port))
         print("%s: Listening for FTP connection on port: %s" %(self.ip, self.ftp_port))
         while True:
-            ftpTransSock.listen()
+            ftpTransSock.listen(1)
             ftpConnSock, addr = ftpTransSock.accept()
             break
         print("%s: FTP connection from (%s)" %(self.ip, str(addr)))
