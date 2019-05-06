@@ -28,6 +28,7 @@ isConnected = False
 Shutdown = False
 isFound = True
 isDebugEnabled = False
+useDlib = False
 sendImageThread = FileTransferClient.FileTransferClient(TCP_IP, TCP_SERVER_PORT, TCP_FTP_PORT, 1024, "savedImage.jpg")
 
 # Create a thread to send the image
@@ -87,13 +88,15 @@ def captureImage():
 
 # when debug mode 
 def enableDebug():
-    global isDebugEnabled
+    global isDebugEnabled, useDlib
     if not isDebugEnabled:
         print ("debug enabled")
         isDebugEnabled = True
+        useDlib = True
     else:
         print ("debug disabled")
         isDebugEnabled = False
+        useDlib = False
 
 # Button to capture the image
 captureButton = Button(root, text="Capture", command=captureImage)
@@ -160,31 +163,45 @@ def enter_user_name():
   
 
 def show_frame():
-    global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor, isFound
+    global isCaptureImage, isConnected, didTakeImage, sendImageThread, face_cascade, fontColor, isFound, useDlib
     imageText = ""
     foundFace = False
+
+    # Set useDlib to false to help performace
+    if not isDebugEnabled:
+        useDlib = False
+
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
 	
     # Detect if a face is in the frame
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray_frame, 1.3, 5)
 
     # Move the frame to a new variable to remove the blue border
     displayFrame = cv2.copyMakeBorder(frame, 0,0,0,0, cv2.BORDER_REPLICATE)
 
-    # Comment out for now while the new face detector gets worked on
-    # Loop over the faces found and draw a rectangle
-    '''for (x, y, w, h) in faces:
-        foundFace = True
-        x1 = x - IMAGE_PADDING_X
-        y1 = y - IMAGE_PADDING_Y_UP
-        x2 = x + w + IMAGE_PADDING_X
-        y2 = y + h + IMAGE_PADDING_Y_DOWN
-        cv2.rectangle(displayFrame, (x1, y1), (x2, y2), (255, 0, 0), lineType)'''
+    if isCaptureImage:
+        useDlib = True
 
-    # Get the height and width of the face
-    faceLandmarks.get_facial_landmarks(displayFrame)
+    if not useDlib:
+        faces = face_cascade.detectMultiScale(gray_frame, 1.3, 5)
+
+        # Loop over the faces found and draw a rectangle
+        for (x, y, w, h) in faces:
+            foundFace = True
+            x1 = x - IMAGE_PADDING_X
+            y1 = y - IMAGE_PADDING_Y_UP
+            x2 = x + w + IMAGE_PADDING_X
+            y2 = y + h + IMAGE_PADDING_Y_DOWN
+            cv2.rectangle(displayFrame, (x1, y1), (x2, y2), (255, 0, 0), lineType)
+    else:
+        # Get the height and width of the face
+        faceLandmarks.get_facial_landmarks(displayFrame)
+            # Draw the box around the face if found
+        if faceLandmarks.faceFound:
+            foundFace = True
+            faceLandmarks.get_height_width(displayFrame)
+            displayFrame = faceLandmarks.draw_face_frame(displayFrame)
     
     # display facial landmarks and other debug info to screen
     if isDebugEnabled:
@@ -195,12 +212,6 @@ def show_frame():
         faceLandmarks.draw_on_image(displayFrame)
         faceLandmarks.drawLandmarks(cv2, displayFrame)
 
-    # Draw the box around the face if found
-    if faceLandmarks.faceFound:
-        foundFace = True
-        faceLandmarks.get_height_width(displayFrame)
-        displayFrame = faceLandmarks.draw_face_frame(displayFrame)
-
     # Take a picture if the button has been pressed
     if isCaptureImage and isConnected:
         print("Taking picture")
@@ -208,9 +219,11 @@ def show_frame():
 
         # Check if there was a face in the frame before saving image
         if foundFace:
+            # Get the roi
             faceFrame = getROI(frame, faceLandmarks.x1, faceLandmarks.y1, faceLandmarks.x2, faceLandmarks.y2)
             faceFrame = cv2.resize(faceFrame, (IMAGE_SIZE, IMAGE_SIZE))
             cv2.imwrite("savedImage.jpg", faceFrame)
+
             # Start the thread and send the image
             isCaptureImage = False
             didTakeImage = True
